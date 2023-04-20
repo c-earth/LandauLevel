@@ -67,9 +67,3 @@ def shift(xs0, ys0, xs, ys):
     mask0 = (ys0 < ymax) * (ys0 > ymin)
     x_interp = PchipInterpolator(*resolve_monotone(ys[mask > 0], xs[mask > 0]), extrapolate = False)
     return x_interp(ys0[mask0 > 0]) / xs0[mask0 > 0]
-
-
-plot_rho(data, temperatures, resu_dir)
-plot_MR(data, temperatures, resu_dir)
-plot_MRK(data, temperatures, resu_dir)
-plot_MREK(data, temperatures, resu_dir)
