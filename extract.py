@@ -63,10 +63,8 @@ for file_name in os.listdir(data_dir):
     H = np.linspace(0, 9, 1000)
     pos_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[0], rho_xx_pos['Field']]), np.concatenate([[rho_xx_0], rho_xx_pos['rho_xx']])), extrapolate = False)
     rho_xx_pos_new = pos_interp(H)
-    # rho_xx_pos_new = np.interp(H, rho_xx_pos['Field'], rho_xx_pos['rho_xx'])
     neg_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[0], np.abs(rho_xx_neg['Field'])]), np.concatenate([[rho_xx_0], rho_xx_neg['rho_xx']])), extrapolate = False)
     rho_xx_neg_new = neg_interp(H)
-    # rho_xx_neg_new = np.interp(H, np.abs(rho_xx_neg['Field']), rho_xx_neg['rho_xx'])
     
     rho_xx= (rho_xx_pos_new + rho_xx_neg_new)/2
     resu[data['Temperature'][0]] = [H, rho_xx]
