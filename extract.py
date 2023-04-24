@@ -35,11 +35,10 @@ ch = 2
 ########################################################
 
 
-# data processing options
+# field interpolation range and rasolution
 H_min = 0.0
 H_max = 9.0
 H_res = 1000
-trunc = True
 
 
 # extracted data file name
@@ -92,30 +91,29 @@ rho_xxs = rho_xxs[idxs]
 
 
 # truncate all H of data at all temperatures to  be the same
-if trunc:
-    idx_min = 0
-    idx_max = H_res - 1
-    for rho_xx in rho_xxs:
-        got_min = False
-        got_max = False
+idx_min = 0
+idx_max = H_res - 1
+for rho_xx in rho_xxs:
+    got_min = False
+    got_max = False
 
-        nans = np.isnan(rho_xx)
+    nans = np.isnan(rho_xx)
 
-        for i, nan in enumerate(nans):
-            if not got_min:
-                if not nan:
-                    idx_min = max(idx_min, i)
-                    got_min = True
-            else:
-                if not got_max:
-                    if nan:
-                        idx_max = min(idx_max, i - 1)
-                        got_max = True
-                    elif i == len(nans) - 1:
-                        idx_max = min(idx_max, i)
+    for i, nan in enumerate(nans):
+        if not got_min:
+            if not nan:
+                idx_min = max(idx_min, i)
+                got_min = True
+        else:
+            if not got_max:
+                if nan:
+                    idx_max = min(idx_max, i - 1)
+                    got_max = True
+                elif i == len(nans) - 1:
+                    idx_max = min(idx_max, i)
 
-    Hs = Hs[:, idx_min: idx_max + 1]
-    rho_xxs = rho_xxs[:, idx_min: idx_max + 1]
+Hs = Hs[:, idx_min: idx_max + 1]
+rho_xxs = rho_xxs[:, idx_min: idx_max + 1]
 
 
 # save data
