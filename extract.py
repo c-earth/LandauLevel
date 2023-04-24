@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle as pkl
 from scipy.interpolate import PchipInterpolator
+from util.data import resolve_monotone
 
 # # MR_S2
 # data_dir = 'D:/python_project/LandauLevel/data/MR_S2/'
@@ -19,30 +20,6 @@ L = 0.70    # length
 ch = 1      # Rxx_{xx} channel
 
 resu_name = data_dir[:-1] + '_extracted'
-
-def resolve_monotone(Xs, Ys):
-    idx = np.argsort(Xs)
-    Xs_tmp = np.array(Xs)[idx]
-    Ys_tmp = np.array(Ys)[idx]
-    Xs_out = []
-    Ys_out = []
-    vx = 0
-    vys = []
-    for x, y in zip(Xs_tmp, Ys_tmp):
-        if vys == []:
-            vx = x
-            vys.append(y)
-        elif x == vx:
-            vys.append(y)
-        else:
-            Xs_out.append(vx)
-            Ys_out.append(sum(vys)/len(vys))
-            vx = x
-            vys = [y]
-    if vys != []:
-        Xs_out.append(vx)
-        Ys_out.append(sum(vys)/len(vys))
-    return np.array(Xs_out), np.array(Ys_out)
 
 resu = {}
 for file_name in os.listdir(data_dir):
