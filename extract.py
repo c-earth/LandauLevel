@@ -2,26 +2,54 @@ import os
 import pandas as pd
 import numpy as np
 import pickle as pkl
+
 from scipy.interpolate import PchipInterpolator
 from util.data import resolve_monotone
 
-# # MR_S2
-# data_dir = 'D:/python_project/LandauLevel/data/MR_S2/'
-# T = 0.85    # thickness
-# W = 1.76    # width
-# L = 1.33    # length
-# ch = 2      # \pho_{xx} channel
 
-# MR_S4
-data_dir = 'D:/python_project/LandauLevel/data/MR_S4/'
-T = 0.61    # thickness
-W = 1.81    # width
-L = 0.70    # length
-ch = 1      # Rxx_{xx} channel
+# data inputs
+#######################################################
+# MR_S2
+# sample's measurement data folder
+data_dir = 'D:/python_project/LandauLevel/data/MR_S2/'
 
-resu_name = data_dir[:-1] + '_extracted'
+# thickness, width, and length of the sample
+T = 0.85
+W = 1.76
+L = 1.33
 
-resu = {}
+# PPMS measurement channel number
+ch = 2
+########################################################
+# # MR_S4
+# # sample's measurement data folder
+# data_dir = 'D:/python_project/LandauLevel/data/MR_S4/'
+
+# # thickness, width, and length of the sample
+# T = 0.61
+# W = 1.81
+# L = 0.70
+
+# # PPMS measurement channel number
+# ch = 1
+########################################################
+
+
+# data processing options
+H_min = 0.0
+H_max = 9.0
+H_res = 1000
+trunc = True
+
+
+# extracted data file name
+resu_name = data_dir[:-1] + '_extracted.pkl'
+
+
+# extract data
+Ts = []
+Hs = []
+rho_xxs = []
 for file_name in os.listdir(data_dir):
     data = pd.read_csv(os.path.join(data_dir, file_name))
     data.rename(columns = {'Temperature (K)': 'Temperature', 
@@ -37,14 +65,59 @@ for file_name in os.listdir(data_dir):
     rho_xx_pos = data.loc[(data['Field'] > 0)].sort_values(by = 'Field', ascending = True)
     rho_xx_neg = data.loc[(data['Field'] < 0)].sort_values(by = 'Field', ascending = False)
     
-    H = np.linspace(0, 9, 1000)
-    pos_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[0], rho_xx_pos['Field']]), np.concatenate([[rho_xx_0], rho_xx_pos['rho_xx']])), extrapolate = False)
+    # interpolate data between corresponding positive and negative fields
+    H = np.linspace(H_min, H_max, H_res)
+    pos_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[H_min], rho_xx_pos['Field']]), np.concatenate([[rho_xx_0], rho_xx_pos['rho_xx']])), extrapolate = False)
     rho_xx_pos_new = pos_interp(H)
-    neg_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[0], np.abs(rho_xx_neg['Field'])]), np.concatenate([[rho_xx_0], rho_xx_neg['rho_xx']])), extrapolate = False)
+    neg_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[H_min], np.abs(rho_xx_neg['Field'])]), np.concatenate([[rho_xx_0], rho_xx_neg['rho_xx']])), extrapolate = False)
     rho_xx_neg_new = neg_interp(H)
     
-    rho_xx= (rho_xx_pos_new + rho_xx_neg_new)/2
-    resu[data['Temperature'][0]] = [H, rho_xx]
+    # get unbiased resistivity
+    rho_xx = (rho_xx_pos_new + rho_xx_neg_new)/2
 
+    Ts.append(data['Temperature'][0])
+    Hs.append(H)
+    rho_xxs.append(rho_xx)
+
+Ts = np.array(Ts)
+Hs = np.stack(Hs)
+rho_xxs = np.stack(rho_xxs)
+
+
+# sort data by temperature
+idxs = np.argsort(Ts)
+Ts = Ts[idxs]
+Hs = Hs[idxs]
+rho_xxs = rho_xxs[idxs]
+
+
+# truncate all H of data at all temperatures to  be the same
+if trunc:
+    idx_min = 0
+    idx_max = H_res - 1
+    for rho_xx in rho_xxs:
+        got_min = False
+        got_max = False
+
+        nans = np.isnan(rho_xx)
+
+        for i, nan in enumerate(nans):
+            if not got_min:
+                if not nan:
+                    idx_min = max(idx_min, i)
+                    got_min = True
+            else:
+                if not got_max:
+                    if nan:
+                        idx_max = min(idx_max, i - 1)
+                        got_max = True
+                    elif i == len(nans) - 1:
+                        idx_max = min(idx_max, i)
+
+    Hs = Hs[:, idx_min: idx_max + 1]
+    rho_xxs = rho_xxs[:, idx_min: idx_max + 1]
+
+
+# save data
 with open(resu_name, 'wb') as f:
-    pkl.dump(resu, f)
+    pkl.dump([Ts, Hs, rho_xxs], f)
