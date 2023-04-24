@@ -12,8 +12,6 @@ xmax = 9.   # Upper bound on field to consider
 Fmin = 1.5  # Lower bound on frequency to cut off tail of 0 frequency component (user should change this accordingly)
 Fmax = 70   # Upper bound on frequency to exclude small high frequency components
 
-f1,ax1 = plt.subplots(1,1,figsize=(8,7))
-f2,ax2 = plt.subplots(1,1,figsize=(8,7))
 
 def truncate_colormap(cmap, minval = 0., maxval = 1., n = 100):
     new_cmap = colors.LinearSegmentedColormap.from_list('trunc({n},{a:.2f},{b:.2f})'.format(n = cmap.name, a = minval, b = maxval), cmap(np.linspace(minval, maxval, n)))

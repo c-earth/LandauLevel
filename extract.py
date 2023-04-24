@@ -46,8 +46,8 @@ resu_name = data_dir[:-1] + '_extracted.pkl'
 
 
 # extract data
+Hs = np.linspace(H_min, H_max, H_res)
 Ts = []
-Hs = []
 rho_xxs = []
 for file_name in os.listdir(data_dir):
     data = pd.read_csv(os.path.join(data_dir, file_name))
@@ -65,28 +65,24 @@ for file_name in os.listdir(data_dir):
     rho_xx_neg = data.loc[(data['Field'] < 0)].sort_values(by = 'Field', ascending = False)
     
     # interpolate data between corresponding positive and negative fields
-    H = np.linspace(H_min, H_max, H_res)
     pos_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[H_min], rho_xx_pos['Field']]), np.concatenate([[rho_xx_0], rho_xx_pos['rho_xx']])), extrapolate = False)
-    rho_xx_pos_new = pos_interp(H)
+    rho_xx_pos_new = pos_interp(Hs)
     neg_interp = PchipInterpolator(*resolve_monotone(np.concatenate([[H_min], np.abs(rho_xx_neg['Field'])]), np.concatenate([[rho_xx_0], rho_xx_neg['rho_xx']])), extrapolate = False)
-    rho_xx_neg_new = neg_interp(H)
+    rho_xx_neg_new = neg_interp(Hs)
     
     # get unbiased resistivity
     rho_xx = (rho_xx_pos_new + rho_xx_neg_new)/2
 
     Ts.append(data['Temperature'][0])
-    Hs.append(H)
     rho_xxs.append(rho_xx)
 
 Ts = np.array(Ts)
-Hs = np.stack(Hs)
 rho_xxs = np.stack(rho_xxs)
 
 
 # sort data by temperature
 idxs = np.argsort(Ts)
 Ts = Ts[idxs]
-Hs = Hs[idxs]
 rho_xxs = rho_xxs[idxs]
 
 
@@ -112,7 +108,7 @@ for rho_xx in rho_xxs:
                 elif i == len(nans) - 1:
                     idx_max = min(idx_max, i)
 
-Hs = Hs[:, idx_min: idx_max + 1]
+Hs = Hs[idx_min: idx_max + 1]
 rho_xxs = rho_xxs[:, idx_min: idx_max + 1]
 
 

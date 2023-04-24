@@ -1,54 +1,51 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from scipy.interpolate import PchipInterpolator
 from extract import resolve_monotone
 
-def plot_rho(data, temperatures, co):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
 
-    plt.figure()
-    for temperature in temperatures:
-        plt.plot(data[temperature][0][co:], data[temperature][1][co:], '-', color = colors[int(temperature)])
-    plt.yscale('log')
+def plot_rho(Ts, Hs, rho_xxs, cutoff, file_name):
+    colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
+
+    plt.subplots(1, 1, figsize = (8,7))
+    for T, rho_xx in zip(Ts, rho_xxs):
+        plt.plot(Hs[cutoff:], rho_xx[cutoff:], '-', color = colors[int(T)])
+    
+    plt.xlabel(r'$H$ [$T$]')
+    plt.ylabel(r'$\rho_{xx}$ [$\Omega\cdot m$]')
     plt.xscale('log')
-    plt.show()
-
-def plot_MR(data, temperatures, co):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
-
-    plt.figure()
-    for temperature in temperatures:
-        plt.plot(data[temperature][0][co:], 100*(data[temperature][1][co:]/data[temperature][1][0]-1), '-', color = colors[int(temperature)])
     plt.yscale('log')
+    plt.savefig(file_name)
+
+
+def plot_MR(Ts, Hs, MRs, cutoff, file_name):
+    colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
+
+    plt.subplots(1, 1, figsize = (8,7))
+    for T, MR in zip(Ts, MRs):
+        plt.plot(Hs[cutoff:], MR[cutoff:], '-', color = colors[int(T)])
+    
+    plt.xlabel(r'$H$ [$T$]')
+    plt.ylabel(r'$MR$ [%]')
     plt.xscale('log')
-    plt.show()
-
-def plot_MRK(data, temperatures, co):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
-
-    plt.figure()
-    for temperature in temperatures:
-        plt.plot(data[temperature][0][co:]/data[temperature][1][0], 100*(data[temperature][1][co:]/data[temperature][1][0]-1), '-', color = colors[int(temperature)])
     plt.yscale('log')
+    plt.savefig(file_name)
+
+
+def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name):
+    colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
+
+    plt.subplots(1, 1, figsize = (8,7))
+    for T, MR, rho_xx0 in zip(Ts, MRs, rho_xx0s):
+        plt.plot(Hs[cutoff:]/rho_xx0, MR[cutoff:], '-', color = colors[int(T)])
+    
+    plt.xlabel(r'$H/\rho_{0}$ [$T\cdot\Omega^{-1}\cdot m^{-1}$]')
+    plt.ylabel(r'$MR$ [%]')
     plt.xscale('log')
-    plt.show()
-
-def plot_MREK(data, temperatures, co):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
-
-    plt.figure()
-    nTs = []
-    for temperature in temperatures:
-        rho0nTs = MR_shift(data[temperatures[-1]][0][co:], 100*(data[temperatures[-1]][1][co:]/data[temperatures[-1]][1][0]-1), data[temperature][0][co:], 100*(data[temperature][1][co:]/data[temperature][1][0]-1))
-        rho0nT = np.mean(rho0nTs[~np.isnan(rho0nTs)])
-        plt.plot(data[temperature][0][co:]/rho0nT, 100*(data[temperature][1][co:]/data[temperature][1][0]-1), '-', color = colors[int(temperature)])
-        nTs.append(rho0nT/data[temperature][1][0])
     plt.yscale('log')
-    plt.xscale('log')
-    plt.show()
-    plt.figure()
-    plt.plot(temperatures, nTs)
-    plt.show()
+    plt.savefig(file_name)
+
 
 def MR_shift(xs0, ys0, xs, ys):
     ymin = max(np.min(ys0), np.min(ys))
@@ -57,3 +54,26 @@ def MR_shift(xs0, ys0, xs, ys):
     mask0 = (ys0 < ymax) * (ys0 > ymin)
     x_interp = PchipInterpolator(*resolve_monotone(ys[mask > 0], xs[mask > 0]), extrapolate = False)
     return x_interp(ys0[mask0 > 0]) / xs0[mask0 > 0]
+
+
+def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name, file_name2):
+    colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
+
+    plt.subplots(1, 1, figsize = (8,7))
+    nTs = []
+    for T, MR, rho_xx0 in zip(Ts, MRs, rho_xx0s):
+        rho0nTs = MR_shift(Hs[cutoff:], MRs[-1][cutoff:], Hs[cutoff:], MR[cutoff:])
+        rho0nT = np.mean(rho0nTs[~np.isnan(rho0nTs)])
+        plt.plot(Hs[cutoff:]/rho0nT, MR[cutoff:], '-', color = colors[int(T)])
+        nTs.append(rho0nT/rho_xx0)
+    plt.xlabel(r'$H/\rho_{0}n_T$ [$T\cdot\Omega^{-1}\cdot m^{-1}$]')
+    plt.ylabel(r'$MR$ [%]')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.savefig(file_name)
+
+    plt.subplots(1, 1, figsize = (8,7))
+    plt.plot(Ts, nTs)
+    plt.xlabel(r'$T$ [K]')
+    plt.ylabel(r'$n_T$ []')
+    plt.savefig(file_name2)
