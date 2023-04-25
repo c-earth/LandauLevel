@@ -1,12 +1,16 @@
-import matplotlib.pyplot as plt
+import os
 import numpy as np
+import matplotlib.pyplot as plt
+
 from scipy.optimize import curve_fit
+
 
 def poly(x, *ps):
     out = 0
     for i in range(len(ps)):
         out += ps[i] * x ** i
     return out
+
 
 def dpoly(x, *ps):
     out = 0
@@ -16,6 +20,7 @@ def dpoly(x, *ps):
         else:
             out += i * ps[i] * x ** (i - 1)
     return out
+
 
 def pieces_poly(xm, *bspss):
     x = xm[:-1]
@@ -39,43 +44,84 @@ def pieces_poly(xm, *bspss):
     
     return out
 
-def subbg_poly(data, temperatures, n):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
-    out = dict()
 
-    plt.figure()
-    for temperature in temperatures:
-        H = data[temperature][0]
-        rho_xx = data[temperature][1]
-        ps, _ = curve_fit(poly, H, rho_xx, p0 = np.ones(n), sigma = np.sqrt(rho_xx + 1) - 1)
-        plt.plot(H, rho_xx, '-', color = colors[int(temperature)])
-        plt.plot(H, poly(H, *ps), '--', color = colors[int(temperature)])
-        out[temperature] = [H, rho_xx - poly(H, *ps)] 
-    plt.show()
-    return out
+def subbg_poly(Ts, Hs, MRs, po_power, T_max, resu_dir):
+    colors = plt.cm.jet(np.linspace(0, 1, T_max + 1))
+    Hs_out = np.copy(Hs)
+    MRs_out = []
 
-def subbg_pieces_poly(data, temperatures, m, n):
-    colors = plt.cm.jet(np.linspace(0, 1, int(max(temperatures)) + 1))
-    out = dict()
+    for T, MR in zip(Ts, MRs):
+        if T > T_max:
+            break
+        ps, _ = curve_fit(poly, Hs, MR, p0 = np.ones(po_power + 1), sigma = np.sqrt(MR + 1))
+        bg = poly(Hs, *ps)
+        MRs_out.append(MR - bg)
 
-    plt.figure()
-    for temperature in temperatures:
-        H = data[temperature][0]
-        rho_xx = data[temperature][1]
-        bspss, _ = curve_fit(pieces_poly, np.concatenate([H, [m]]), rho_xx, p0 = np.ones(m - 1 + m * n), sigma = np.sqrt(rho_xx + 1) - 1, maxfev = 20000)
-        plt.plot(H, rho_xx, '-', color = colors[int(temperature)])
-        plt.plot(H, pieces_poly(np.concatenate([H, [m]]), *bspss), '--', color = colors[int(temperature)])
-        out[temperature] = [H, rho_xx - pieces_poly(np.concatenate([H, [m]]), *bspss)]
-    plt.show()
-    return out
+        f, ax = plt.subplots(2, 1, figsize = (12,7))
 
-def subbg_derivative(data, temperatures, n):
-    out = dict()
-    for temperature in temperatures:
-        H = data[temperature][0]
-        rho_xx = data[temperature][1]
-        for i in range(1, n+1):
-            rho_xx = (rho_xx[1:] - rho_xx[:-1]) / (H[1:] - H[-1])
-            H = (H[1:] + H[-1])/2
-        out[temperature] = [H, rho_xx]
-    return out
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)])
+        ax[0].plot(Hs, bg, '--', color = 'k')
+        ax[0].set_xlabel(r'$H$ [$T$]')
+        ax[0].set_ylabel(r'$MR$ [%]')
+
+        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)])
+        ax[1].set_xlabel(r'$H$ [$T$]')
+        ax[1].set_ylabel(r'$\Delta MR$ [%]')
+
+        plt.savefig(os.path.join(resu_dir, f'subbg_poly_{T}K.png'))
+    return Hs_out, np.stack(MRs_out)
+
+
+def subbg_pieces_poly(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir):
+    colors = plt.cm.jet(np.linspace(0, 1, T_max + 1))
+    Hs_out = np.copy(Hs)
+    MRs_out = []
+
+    for T, MR in zip(Ts, MRs):
+        if T > T_max:
+            break
+        bspss, _ = curve_fit(pieces_poly, np.concatenate([Hs, [pieces]]), MR, p0 = np.ones(pieces - 1 + pieces * (pp_power + 1)), sigma = np.sqrt(MR + 1), maxfev = 10000)
+        bg = pieces_poly(np.concatenate([Hs, [pieces]]), *bspss)
+        MRs_out.append(MR - bg)
+
+        f, ax = plt.subplots(2, 1, figsize = (12,7))
+
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)])
+        ax[0].plot(Hs, bg, '--', color = 'k')
+        ax[0].set_xlabel(r'$H$ [$T$]')
+        ax[0].set_ylabel(r'$MR$ [%]')
+
+        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)])
+        ax[1].set_xlabel(r'$H$ [$T$]')
+        ax[1].set_ylabel(r'$\Delta MR$ [%]')
+
+        plt.savefig(os.path.join(resu_dir, f'subbg_pieces_poly_{T}K.png'))
+    return Hs_out, np.stack(MRs_out)
+
+
+def subbg_derivative(Ts, Hs, MRs, de_power, T_max, resu_dir):
+    colors = plt.cm.jet(np.linspace(0, 1, T_max + 1))
+    MRs_out = []
+
+    for T, MR in zip(Ts, MRs):
+        if T > T_max:
+            break
+        Hs_out = np.copy(Hs)
+        MR_out = np.copy(MR)
+        for i in range(1, de_power + 1):
+            MR_out = (MR_out[1:] - MR_out[:-1]) / (Hs_out[1:] - Hs_out[:-1])
+            Hs_out = (Hs_out[1:] + Hs_out[:-1])/2
+        MRs_out.append(MR)
+
+        f, ax = plt.subplots(2, 1, figsize = (12,7))
+
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)])
+        ax[0].set_xlabel(r'$H$ [$T$]')
+        ax[0].set_ylabel(r'$MR$ [%]')
+
+        ax[1].plot(Hs_out, MR_out, '-', color = colors[int(T)])
+        ax[1].set_xlabel(r'$H$ [$T$]')
+        ax[1].set_ylabel(r'$\Delta MR$ [%]')
+
+        plt.savefig(os.path.join(resu_dir, f'subbg_derivative_{T}K.png'))
+    return Hs_out, np.stack(MRs_out)

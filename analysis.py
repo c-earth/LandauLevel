@@ -31,11 +31,21 @@ MRs = (rho_xxs / rho_xxs[:, :1] - 1) * 100
 
 # Kohler's rule analysis
 cutoff = 10
-plot_rho(Ts, Hs, rho_xxs, cutoff, os.path.join(resu_dir, 'rho_vs_H.png'))
-plot_MR(Ts, Hs, MRs, cutoff, os.path.join(resu_dir, 'MR_vs_H.png'))
-plot_MRK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, os.path.join(resu_dir, 'MR_vs_H_rho0.png'))
-plot_MREK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, os.path.join(resu_dir, 'MR_vs_H_rho0nT.png'), os.path.join(resu_dir, 'nT_vs_T.png'))
+plot_rho(Ts, Hs, rho_xxs, cutoff, resu_dir)
+plot_MR(Ts, Hs, MRs, cutoff, resu_dir)
+plot_MRK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
+plot_MREK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 
+
+# background subtraction
+po_power = 5
+pieces = 2
+pp_power = 4
+de_power = 2
+T_max = 20
+Hs_po, MRs_po = subbg_poly(Ts, Hs, MRs, po_power, T_max, resu_dir)
+Hs_pp, MRs_pp = subbg_pieces_poly(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir)
+Hs_de, MRs_de = subbg_derivative(Ts, Hs, MRs, de_power, T_max, resu_dir)
 
 # data_subbg = subbg_poly(data, temperatures, 4)
 # for t in range(len(temperatures)):

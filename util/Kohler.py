@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -5,7 +6,7 @@ from scipy.interpolate import PchipInterpolator
 from extract import resolve_monotone
 
 
-def plot_rho(Ts, Hs, rho_xxs, cutoff, file_name):
+def plot_rho(Ts, Hs, rho_xxs, cutoff, resu_dir):
     colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
 
     plt.subplots(1, 1, figsize = (8,7))
@@ -16,10 +17,10 @@ def plot_rho(Ts, Hs, rho_xxs, cutoff, file_name):
     plt.ylabel(r'$\rho_{xx}$ [$\Omega\cdot m$]')
     plt.xscale('log')
     plt.yscale('log')
-    plt.savefig(file_name)
+    plt.savefig(os.path.join(resu_dir, 'rho_vs_H.png'))
 
 
-def plot_MR(Ts, Hs, MRs, cutoff, file_name):
+def plot_MR(Ts, Hs, MRs, cutoff, resu_dir):
     colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
 
     plt.subplots(1, 1, figsize = (8,7))
@@ -30,10 +31,10 @@ def plot_MR(Ts, Hs, MRs, cutoff, file_name):
     plt.ylabel(r'$MR$ [%]')
     plt.xscale('log')
     plt.yscale('log')
-    plt.savefig(file_name)
+    plt.savefig(os.path.join(resu_dir, 'MR_vs_H.png'))
 
 
-def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name):
+def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
 
     plt.subplots(1, 1, figsize = (8,7))
@@ -44,7 +45,7 @@ def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name):
     plt.ylabel(r'$MR$ [%]')
     plt.xscale('log')
     plt.yscale('log')
-    plt.savefig(file_name)
+    plt.savefig(os.path.join(resu_dir, 'MR_vs_H_rho0.png'))
 
 
 def MR_shift(xs0, ys0, xs, ys):
@@ -56,7 +57,7 @@ def MR_shift(xs0, ys0, xs, ys):
     return x_interp(ys0[mask0 > 0]) / xs0[mask0 > 0]
 
 
-def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name, file_name2):
+def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     colors = plt.cm.jet(np.linspace(0, 1, int(np.max(Ts)) + 1))
 
     plt.subplots(1, 1, figsize = (8,7))
@@ -70,10 +71,10 @@ def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, file_name, file_name2):
     plt.ylabel(r'$MR$ [%]')
     plt.xscale('log')
     plt.yscale('log')
-    plt.savefig(file_name)
+    plt.savefig(os.path.join(resu_dir, 'MR_vs_H_rho0nT.png'))
 
     plt.subplots(1, 1, figsize = (8,7))
     plt.plot(Ts, nTs)
     plt.xlabel(r'$T$ [K]')
     plt.ylabel(r'$n_T$ []')
-    plt.savefig(file_name2)
+    plt.savefig(os.path.join(resu_dir, 'nT_vs_T.png'))
