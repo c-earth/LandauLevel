@@ -3,7 +3,7 @@ import pickle as pkl
 import numpy as np
 
 from util.Kohler import plot_rho, plot_MR, plot_MRK, plot_MREK
-from util.back_ground import subbg_poly, subbg_pieces_poly, subbg_derivative
+from util.back_ground import subbg_po, subbg_pp, subbg_de
 # from util.Landau import FFT, FFT_peaks, signal_filter
 
 # # MR_S2
@@ -13,6 +13,12 @@ from util.back_ground import subbg_poly, subbg_pieces_poly, subbg_derivative
 # MR_S4
 data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
 resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
+
+
+# select background options
+po = True
+pp = True
+de = True
 
 
 # create analysis result folder
@@ -43,11 +49,20 @@ pieces = 2
 pp_power = 4
 de_power = 2
 T_max = 20
-Hs_po, MRs_po = subbg_poly(Ts, Hs, MRs, po_power, T_max, resu_dir)
-Hs_pp, MRs_pp = subbg_pieces_poly(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir)
-Hs_de, MRs_de = subbg_derivative(Ts, Hs, MRs, de_power, T_max, resu_dir)
+QO_data = dict()
+if po:
+    QO_data['po'] = subbg_po(Ts, Hs, MRs, po_power, T_max, resu_dir)
+if pp:
+    QO_data['pp'] = subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir)
+if de:
+    QO_data['de'] = subbg_de(Ts, Hs, MRs, de_power, T_max, resu_dir)
 
-# data_subbg = subbg_poly(data, temperatures, 4)
+
+for subbg, (Ts_sub, Hs_sub, MRs_sub) in QO_data.items():
+    for T, MR in zip(Ts_sub, MRs_sub):
+        pass
+
+
 # for t in range(len(temperatures)):
 #     label = str(np.round(temperatures[t],1))+'K'
 #     xc,yc = data_subbg[temperatures[t]]
