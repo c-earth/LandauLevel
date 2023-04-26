@@ -4,20 +4,20 @@ import numpy as np
 
 from util.Kohler import plot_rho, plot_MR, plot_MRK, plot_MREK
 from util.back_ground import subbg_po, subbg_pp, subbg_de
-# from util.Landau import FFT, FFT_peaks, signal_filter
+from util.Landau import FFT#, FFT_peaks, signal_filter
 
-# # MR_S2
-# data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
-# resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
+# MR_S2
+data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
+resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
 
-# MR_S4
-data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
-resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
+# # MR_S4
+# data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
+# resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
 
 
 # select background options
-po = True
-pp = True
+po = False
+pp = False
 de = True
 
 
@@ -43,11 +43,17 @@ plot_MRK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 plot_MREK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 
 
-# background subtraction
-po_power = 5
+# # background subtraction
+# MR_S2
+po_power = 7
 pieces = 2
 pp_power = 4
-de_power = 2
+
+# # MR_S4
+# po_power = 5
+# pieces = 2
+# pp_power = 3
+
 T_max = 20
 QO_data = dict()
 if po:
@@ -55,20 +61,12 @@ if po:
 if pp:
     QO_data['pp'] = subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir)
 if de:
-    QO_data['de'] = subbg_de(Ts, Hs, MRs, de_power, T_max, resu_dir)
+    QO_data['de'] = subbg_de(Ts, Hs, MRs, T_max, resu_dir)
 
 
 for subbg, (Ts_sub, Hs_sub, MRs_sub) in QO_data.items():
-    for T, MR in zip(Ts_sub, MRs_sub):
-        pass
+    iHs, MRs_iH, qs, MRs_iH_fft = FFT(Ts_sub, Hs_sub[Hs_sub > 0], MRs_sub[:, Hs_sub > 0], subbg, resu_dir)
 
-
-# for t in range(len(temperatures)):
-#     label = str(np.round(temperatures[t],1))+'K'
-#     xc,yc = data_subbg[temperatures[t]]
-#     xc = xc[1:]
-#     yc = yc[1:]
-
-#     ix,y,q,yfft = FFT(xc,yc)
+#     
 #     qpeaks,window_size = FFT_peaks(q,yfft, label)
 #     signal_filter(ix,y,q,yfft,qpeaks,window_size,label)

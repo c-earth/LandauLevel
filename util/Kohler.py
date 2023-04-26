@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.interpolate import PchipInterpolator
-from extract import resolve_monotone
+from util.data import resolve_monotone
 
 
 def plot_rho(Ts, Hs, rho_xxs, cutoff, resu_dir):
@@ -18,6 +18,7 @@ def plot_rho(Ts, Hs, rho_xxs, cutoff, resu_dir):
     plt.xscale('log')
     plt.yscale('log')
     plt.savefig(os.path.join(resu_dir, 'rho_vs_H.png'))
+    plt.close()
 
 
 def plot_MR(Ts, Hs, MRs, cutoff, resu_dir):
@@ -32,6 +33,7 @@ def plot_MR(Ts, Hs, MRs, cutoff, resu_dir):
     plt.xscale('log')
     plt.yscale('log')
     plt.savefig(os.path.join(resu_dir, 'MR_vs_H.png'))
+    plt.close()
 
 
 def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
@@ -46,6 +48,7 @@ def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     plt.xscale('log')
     plt.yscale('log')
     plt.savefig(os.path.join(resu_dir, 'MR_vs_H_rho0.png'))
+    plt.close()
 
 
 def MR_shift(xs0, ys0, xs, ys):
@@ -72,9 +75,11 @@ def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     plt.xscale('log')
     plt.yscale('log')
     plt.savefig(os.path.join(resu_dir, 'MR_vs_H_rho0nT.png'))
+    plt.close()
 
     plt.subplots(1, 1, figsize = (8,7))
     plt.plot(Ts, nTs)
     plt.xlabel(r'$T$ [K]')
     plt.ylabel(r'$n_T$ []')
     plt.savefig(os.path.join(resu_dir, 'nT_vs_T.png'))
+    plt.close()
