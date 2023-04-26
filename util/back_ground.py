@@ -109,7 +109,7 @@ def subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir):
     return np.array(Ts_out), Hs_out, np.stack(MRs_out)
 
 
-def subbg_de(Ts, Hs, MRs, T_max, resu_dir):
+def subbg_de(Ts, Hs, MRs, avg_window, T_max, resu_dir):
     colors = plt.cm.jet(np.linspace(0, 1, T_max + 1))
     Ts_out = []
     MRs_out = []
@@ -119,7 +119,7 @@ def subbg_de(Ts, Hs, MRs, T_max, resu_dir):
             break
         Hs_out = np.copy(Hs)
         MR_out = np.copy(MR)
-        Hs_out, MR_out = running_average(Hs_out, MR_out, 10)
+        Hs_out, MR_out = running_average(Hs_out, MR_out, avg_window)
 
         MR_out = (MR_out[2:] + MR_out[:-2] - 2 * MR_out[1:-1])/(Hs_out[2:]/2 - Hs_out[:-2]/2) ** 2
         Hs_out = Hs_out[1:-1]

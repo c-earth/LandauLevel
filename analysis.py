@@ -9,10 +9,18 @@ from util.Landau import FFT#, FFT_peaks, signal_filter
 # MR_S2
 data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
 resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
+po_power = 7
+pieces = 2
+pp_power = 4
+avg_window = 10
 
 # # MR_S4
 # data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
 # resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
+# po_power = 5
+# pieces = 2
+# pp_power = 3
+# avg_window = 10
 
 
 # select background options
@@ -43,17 +51,7 @@ plot_MRK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 plot_MREK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 
 
-# # background subtraction
-# MR_S2
-po_power = 7
-pieces = 2
-pp_power = 4
-
-# # MR_S4
-# po_power = 5
-# pieces = 2
-# pp_power = 3
-
+# background subtraction
 T_max = 20
 QO_data = dict()
 if po:
@@ -61,12 +59,9 @@ if po:
 if pp:
     QO_data['pp'] = subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir)
 if de:
-    QO_data['de'] = subbg_de(Ts, Hs, MRs, T_max, resu_dir)
+    QO_data['de'] = subbg_de(Ts, Hs, MRs, avg_window, T_max, resu_dir)
 
 
 for subbg, (Ts_sub, Hs_sub, MRs_sub) in QO_data.items():
     iHs, MRs_iH, qs, MRs_iH_fft = FFT(Ts_sub, Hs_sub[Hs_sub > 0], MRs_sub[:, Hs_sub > 0], subbg, resu_dir)
-
-#     
-#     qpeaks,window_size = FFT_peaks(q,yfft, label)
 #     signal_filter(ix,y,q,yfft,qpeaks,window_size,label)
