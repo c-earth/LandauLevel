@@ -4,29 +4,33 @@ import numpy as np
 
 from util.Kohler import plot_rho, plot_MR, plot_MRK, plot_MREK
 from util.back_ground import subbg_po, subbg_pp, subbg_de
-from util.Landau import FFT#, FFT_peaks, signal_filter
+from util.Landau import FFT, FFT_peaks, signal_filter
 
-# MR_S2
-data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
-resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
-po_power = 7
-pieces = 2
-pp_power = 4
-avg_window = 10
-
-# # MR_S4
-# data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
-# resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
-# po_power = 5
+# # MR_S2
+# data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
+# resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
+# po_power = 7
 # pieces = 2
-# pp_power = 3
+# pp_power = 4
 # avg_window = 10
+
+# MR_S4
+data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
+resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
+po_power = 5
+pieces = 2
+pp_power = 3
+avg_window = 10
 
 
 # select background options
-po = False
-pp = False
+po = True
+pp = True
 de = True
+
+
+q_min = 0
+q_max = 30
 
 
 # create analysis result folder
@@ -52,7 +56,7 @@ plot_MREK(Ts, Hs, MRs, rho_xxs[:, :1], cutoff, resu_dir)
 
 
 # background subtraction
-T_max = 20
+T_max = 12
 QO_data = dict()
 if po:
     QO_data['po'] = subbg_po(Ts, Hs, MRs, po_power, T_max, resu_dir)
@@ -63,5 +67,7 @@ if de:
 
 
 for subbg, (Ts_sub, Hs_sub, MRs_sub) in QO_data.items():
-    iHs, MRs_iH, qs, MRs_iH_fft = FFT(Ts_sub, Hs_sub[Hs_sub > 0], MRs_sub[:, Hs_sub > 0], subbg, resu_dir)
-#     signal_filter(ix,y,q,yfft,qpeaks,window_size,label)
+    iHs, MRs_iH, qs, MRs_iH_fft = FFT(Ts_sub, Hs_sub[Hs_sub > 0], MRs_sub[:, Hs_sub > 0], T_max, q_min, q_max, subbg, resu_dir)
+#     for T, q, MR_iH_fft, MR_iH in zip(Ts, qs, MRs_iH_fft, MRs_iH):
+#         qpeaks, window_size = FFT_peaks(q, MR_iH_fft, 1, 25)
+#         signal_filter(iHs, MR_iH, q, MR_iH_fft, qpeaks, window_size, subbg, T)
