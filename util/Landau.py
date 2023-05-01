@@ -155,6 +155,7 @@ def signal_filter(iHs, q, MR_iH_fft, qpeaks, y_widthes, T_max, resu_dir, T, subb
     ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
     ax[0].locator_params(axis='y', nbins=5)
     ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+    ax[0].yaxis.get_offset_text().set_size(20)
 
     ax[1].set_xlabel(r'1/B [T$^{-1}$]', fontsize = 20)
     ax[1].set_xlim([0, ixplot_max])
@@ -162,6 +163,7 @@ def signal_filter(iHs, q, MR_iH_fft, qpeaks, y_widthes, T_max, resu_dir, T, subb
     ax[1].fill_between([0, np.min(iHs)], -0.5, 15.5, color = 'grey', alpha = 0.5)
     ax[1].set_ylabel('Landau level', fontsize = 20)
     ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+    ax[1].yaxis.get_offset_text().set_size(20)
     ax[1].legend(title = f'{T} K', title_fontsize = 20, fontsize = 20, loc = 'upper right')
 
     f.tight_layout()
