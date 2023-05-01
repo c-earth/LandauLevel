@@ -32,19 +32,19 @@ def FFT(Ts_sub, Hs_sub, MRs_sub, T_max, q_min, q_max, subbg, resu_dir):
         ax[0].plot(iH, MR_iH, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[1].plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)], linewidth = 3)
         
-    ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 14)
+    ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-    ax[0].set_xlabel(r'$H^{-1}$ [T$^{-1}$]', fontsize = 14)
-    ax[0].set_ylabel(r'$\Delta MR$ [%]', fontsize = 14)
-    ax[0].yaxis.get_offset_text().set_size(14)
+    ax[0].set_xlabel(r'$H^{-1}$ [T$^{-1}$]', fontsize = 20)
+    ax[0].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
+    ax[0].yaxis.get_offset_text().set_size(20)
     ax[0].set_xscale('log')
-    ax[0].legend()
+    ax[0].legend(fontsize = 20, loc = 'upper right')
 
-    ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 14)
+    ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-    ax[1].set_xlabel(r'$q$ [T]', fontsize = 14)
-    ax[1].set_ylabel(r'$\Delta MR$ [%]', fontsize = 14)
-    ax[1].yaxis.get_offset_text().set_size(14)
+    ax[1].set_xlabel(r'$q$ [T]', fontsize = 20)
+    ax[1].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
+    ax[1].yaxis.get_offset_text().set_size(20)
     ax[1].set_ylim((0, 1.2 * np.max(np.abs(np.stack(MRs_iH_fft))[:, q > 1])))
     ax[1].set_xlim((q_min, q_max))
 
@@ -59,107 +59,111 @@ def separate(p):
     A = p[:args]
     X0 = p[args:2*args]
     S = p[2*args:]
-    return A,X0,S
+    return A, X0, S
 
 
-def lorentz(x,*p):
-    A,X0,S = separate(p)
+def lorentz(x, *p):
+    A, X0, S = separate(p)
     y = np.zeros(len(x))
-    for a,x0,s in zip(A,X0,S):
+    for a,x0,s in zip(A, X0, S):
         y += a/(1+(2.*(x0-x)/s)**2)
     return y
 
 
-def FFT_peaks(q, yfft, Fmin, Fmax):
-
-    yfft = yfft[(q >= Fmin)*(q <= Fmax)]
-    q = q[(q >= Fmin)*(q <= Fmax)]
+def FFT_peaks(q, MR_iH_fft, r_min, r_max, T_max, resu_dir, T, subbg):
+    
+    MR_iH_fft = MR_iH_fft[(q >= r_min)*(q <= r_max)]
+    q = q[(q >= r_min)*(q <= r_max)]
     
 
-    yA = np.abs(yfft).astype(np.float64)
+    yA = np.abs(MR_iH_fft).astype(np.float64)
     ymax = np.max(yA)
 
-    maxinds = argrelextrema(yA,np.greater)[0]
+    maxinds = argrelextrema(yA, np.greater)[0]
 
     ypeaks = yA[maxinds]
-    maxinds = maxinds[ypeaks/ymax > 0.5]
+    maxinds = maxinds[ypeaks/ymax > 0.2]
     ypeaks = yA[maxinds]
     qpeaks = q[maxinds]
 
-    p0 = np.concatenate([ypeaks,qpeaks,np.sqrt(np.gradient(qpeaks))])
-    p, _ = curve_fit(lorentz,q,yA,p0)
-    y_amps,y_pos,y_width = separate(p)
-
-
-    # Reject peaks that have been poorly fit (probably too broad)
-    accept = np.ones(len(ypeaks)).astype(bool)
-    for i in range(len(ypeaks)):
-        if np.abs(qpeaks[i]-y_pos[i])>1:
-            accept[i] = False
+    p0 = np.concatenate([ypeaks, qpeaks, np.sqrt(np.gradient(qpeaks))])
+    numb = len(ypeaks)
+    bounds = [[0]*3*numb, [np.max(np.abs(MR_iH_fft))]*numb+[np.max(q)]*numb+[np.inf]*numb]
+    p, _ = curve_fit(lorentz, q, yA, p0, bounds = bounds, maxfev = 50000)
+    y_amps, y_poss, y_widthes = separate(p)
+    accept = np.argsort(y_amps)[-3:]
     y_amps = y_amps[accept]
-    y_pos = y_pos[accept]
-    y_width = y_width[accept]
+    y_poss = y_poss[accept]
+    y_widthes = y_widthes[accept]
 
-    # Return parameters for windowing
-    qpeaks = qpeaks[accept]
-    window_size = np.sqrt(y_width)
+    colors = mpl.colormaps['gnuplot'](np.linspace(0.3, 0.9, int(T_max) + 1))
+    f, ax = plt.subplots(1, 1, figsize = (8,7))
+    ax.plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)])
+    for y_amp, y_pos, y_width in zip(y_amps, y_poss, y_widthes):
+        ax.plot(q, lorentz(q, y_amp, y_pos, y_width), ':', color = 'k')
+    
+    f.savefig(os.path.join(resu_dir, f'peaks_{subbg}_{T}K.png'))
+    plt.close()
+    return y_poss, y_widthes
 
-    return qpeaks, window_size
+def signal_filter(iHs, q, MR_iH_fft, qpeaks, y_widthes, T_max, resu_dir, T, subbg):
+    colors = mpl.colormaps['gnuplot'](np.linspace(0.3, 0.9, int(T_max) + 1))
+    f, ax = plt.subplots(2, 1, figsize = (8, 7), gridspec_kw = {'height_ratios':[3,5]})
 
-def signal_filter(ix,y,q,yfft,qpeaks,window_size,label, T):
-    # Inverse Fourier transform narrow window around each peak and generate Landau level plots
-    f3,ax3 = plt.subplots(2,1,figsize=(8,7),gridspec_kw = {'height_ratios':[3,5]})
-
-    ixplot_max = 0.7   # User can modify plotting range if desired
-    for i in range(len(qpeaks)):
-        yfft_copy = np.copy(yfft)
-        qmin = qpeaks[i]-window_size[i]/3.
-        qmax = qpeaks[i]+window_size[i]/3.
-        yfft_copy[(q<qmin) | (q>qmax)]=0
+    ixplot_max = 1.4
+    numb = len(qpeaks)
+    idxs = np.argsort(qpeaks)
+    for i, (qpeak, y_width) in enumerate(zip(qpeaks[idxs], y_widthes[idxs])):
+        yfft_copy = np.copy(MR_iH_fft)
+        yfft_copy *= lorentz(q, 2/y_width/np.pi, qpeak, y_width)
         yfilter = np.fft.irfft(yfft_copy)
 
-        num_osc = int(qpeaks[i]/2.)+2       # Cut off how many period of oscillation are plotted using a reasonable rule
-        maxinds = argrelextrema(yfilter,np.greater)[0][0:num_osc]
-        mininds = argrelextrema(yfilter,np.less)[0][0:num_osc]
-        slope = qpeaks[i]
+        num_osc = int(qpeak/2) + 2
+        maxinds = argrelextrema(yfilter, np.greater)[0][0:num_osc]
+        mininds = argrelextrema(yfilter, np.less)[0][0:num_osc]
+        slope = qpeak
 
-        # Make all maxima at integers and minima at half-integers
-        n_max0 = np.round(slope*(ix[maxinds[0]]))
+        n_max0 = np.round(slope*(iHs[maxinds[0]]))
         n_max = np.arange(n_max0,n_max0+len(mininds),1)
-        if ix[mininds[0]]<ix[maxinds[0]]:
+        if iHs[mininds[0]]<iHs[maxinds[0]]:
             n_min0 = n_max0-0.5
         else:
             n_min0 = n_max0+0.5
-        n_min = np.arange(n_min0,n_min0+len(mininds),1)
-        ixn = np.concatenate([ix[maxinds],ix[mininds]])
+        n_min = np.arange(n_min0, n_min0+len(mininds), 1)
+        ixn = np.concatenate([iHs[maxinds], iHs[mininds]])
         n = np.concatenate([n_max,n_min])
 
         ixn_plot = np.linspace(0,ixplot_max,50)
         p = np.polyfit(ixn,n,1)
         yplot = np.polyval(p,ixn_plot)
-        print('slope: ',p[0],' intercept: ',p[1], ' QL (T): ',1/ixn_plot[np.argmin(np.abs(yplot-1))], ' EQL (T): ',1/ixn_plot[np.argmin(np.abs(yplot-0.5))])
+        print('slope: ',p[0],' intercept: ', p[1])
 
-        ax3[0].plot(ix,yfilter,linewidth=2)
-        ax3[0].scatter(ix[mininds],yfilter[mininds],s=50,linewidth=2,zorder=3)
-        ax3[0].scatter(ix[maxinds],yfilter[maxinds],facecolor='w',s=60,linewidth=2,zorder=3)
-        ax3[1].plot(ixn_plot,yplot,linestyle='--',linewidth=2)
-        ax3[1].scatter(ix[mininds],n_min,s=50,linewidth=2,zorder=3)
-        ax3[1].scatter(ix[maxinds],n_max,s=60,facecolor='w',linewidth=2,zorder=3)
+        color = np.concatenate([colors[int(T)][:3], np.array([(i + 1)/numb])])
 
-    ax3[0].set_title(label)
-    ax3[0].set_ylabel(r'$\mathrm{\mathsf{\Delta}}$MR (%)')
-    ax3[0].set_xlim([0,ixplot_max])
-    ax3[0].set_ylim([3*np.min(yfilter),3*np.max(yfilter)])
-    ax3[0].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-    ax3[0].locator_params(axis='y', nbins=5)
-    ax3[0].tick_params(direction='in',top=False,right=False,length=5,width=1.5)
+        ax[0].plot(iHs, yfilter, linewidth = 3, color = color)
+        ax[0].scatter(iHs[mininds], yfilter[mininds], s = 50, facecolor = color, edgecolors = color, linewidth = 3, zorder = 3)
+        ax[0].scatter(iHs[maxinds], yfilter[maxinds], facecolor = 'w', edgecolors = color, s = 60, linewidth = 3, zorder = 3)
 
-    ax3[1].set_xlabel(r'1/B (T$^\mathrm{-1}$)')
-    ax3[1].set_xlim([0,ixplot_max])
-    ax3[1].set_ylim([-0.5,22.5])
-    ax3[1].set_ylabel('Landau level')
-    ax3[1].tick_params(direction='in',top=False,right=False,length=5,width=1.5)
+        ax[1].plot(ixn_plot, yplot, linestyle = '--', linewidth = 3, color = color, label = f'{round(qpeak, 2)} T')
+        ax[1].scatter(iHs[mininds], n_min, s = 50, facecolor = color, edgecolors = color, linewidth = 3, zorder = 3)
+        ax[1].scatter(iHs[maxinds], n_max, s = 60, facecolor = 'w', edgecolors = color, linewidth = 3, zorder = 3)
 
-    f3.tight_layout()
-    f3.savefig('SdH_'+label+'_'+str(T)+'K.png',bbox_inches='tight',dpi=400)
+    ax[0].set_ylabel(r'$\mathrm{\mathsf{\Delta}}$MR (%)', fontsize = 20)
+    ax[0].set_xlim([0, ixplot_max])
+    ax[0].set_ylim([3*np.min(yfilter),3*np.max(yfilter)])
+    ax[0].fill_between([0, np.min(iHs)], 3*np.min(yfilter),3*np.max(yfilter), color = 'grey', alpha = 0.5)
+    ax[0].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+    ax[0].locator_params(axis='y', nbins=5)
+    ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+
+    ax[1].set_xlabel(r'1/B [T$^{-1}$]', fontsize = 20)
+    ax[1].set_xlim([0, ixplot_max])
+    ax[1].set_ylim([-0.5, 15.5])
+    ax[1].fill_between([0, np.min(iHs)], -0.5, 15.5, color = 'grey', alpha = 0.5)
+    ax[1].set_ylabel('Landau level', fontsize = 20)
+    ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+    ax[1].legend(title = f'{T} K', title_fontsize = 20, fontsize = 20, loc = 'upper right')
+
+    f.tight_layout()
+    f.savefig(os.path.join(resu_dir, f'SdH_{subbg}_{T}K.png'), bbox_inches = 'tight', dpi = 400)
     plt.close()
