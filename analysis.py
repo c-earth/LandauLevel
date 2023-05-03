@@ -6,27 +6,27 @@ from util.Kohler import plot_rho, plot_MR, plot_MRK, plot_MREK
 from util.back_ground import subbg_po, subbg_pp, subbg_de
 from util.Landau import FFT, FFT_peaks, signal_filter
 
-# # MR_S2
-# data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
-# resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
-# po_power = 7
-# pieces = 2
-# pp_power = 4
-# avg_window = 10
-
-# MR_S4
-data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
-resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
-po_power = 5
+# MR_S2
+data_file = 'D:/python_project/LandauLevel/data/MR_S2_extracted.pkl'
+resu_dir = 'D:/python_project/LandauLevel/results/MR_S2/'
+po_power = 7
 pieces = 2
-pp_power = 3
+pp_power = 4
 avg_window = 10
+
+# # MR_S4
+# data_file = 'D:/python_project/LandauLevel/data/MR_S4_extracted.pkl'
+# resu_dir = 'D:/python_project/LandauLevel/results/MR_S4/'
+# po_power = 5
+# pieces = 2
+# pp_power = 3
+# avg_window = 10
 
 
 # select background options
 po = True
-pp = False
-de = False
+pp = True
+de = True
 
 
 q_min = 0
