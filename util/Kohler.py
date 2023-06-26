@@ -14,7 +14,7 @@ def plot_rho(Ts, Hs, rho_xxs, cutoff, resu_dir):
     f, axs = plt.subplots(1, 1, figsize = (8,7))
     for T, rho_xx in zip(Ts, rho_xxs):
         plt.plot(Hs[cutoff:], rho_xx[cutoff:], '-', color = colors[int(T)], linewidth = 3)
-    axs.set_xlabel(r'$H$ [T]', fontsize = 20)
+    axs.set_xlabel(r'$B$ [T]', fontsize = 20)
     axs.set_ylabel(r'$\rho_{xx}$ [$\Omega$m]', fontsize = 20)
     axs.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     axs.set_xlim((np.min(Hs[cutoff:]), np.max(Hs[cutoff:])))
@@ -36,7 +36,7 @@ def plot_MR(Ts, Hs, MRs, cutoff, resu_dir):
     f, axs = plt.subplots(1, 1, figsize = (8,7))
     for T, MR in zip(Ts, MRs):
         plt.plot(Hs[cutoff:], MR[cutoff:], '-', color = colors[int(T)], linewidth = 3)
-    axs.set_xlabel(r'$H$ [T]', fontsize = 20)
+    axs.set_xlabel(r'$B$ [T]', fontsize = 20)
     axs.set_ylabel(r'$MR$ [%]', fontsize = 20)
     axs.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     axs.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
@@ -59,7 +59,7 @@ def plot_MRK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     f, axs = plt.subplots(1, 1, figsize = (8,7))
     for T, MR, rho_xx0 in zip(Ts, MRs, rho_xx0s):
         plt.plot(Hs[cutoff:]/rho_xx0, MR[cutoff:], '-', color = colors[int(T)], linewidth = 3)
-    axs.set_xlabel(r'$H/\rho_{0}$ [T$\Omega^{-1}$m$^{-1}$]', fontsize = 20)
+    axs.set_xlabel(r'$B/\rho_{0}$ [T$\Omega^{-1}$m$^{-1}$]', fontsize = 20)
     axs.set_ylabel(r'$MR$ [%]', fontsize = 20)
     axs.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     axs.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
@@ -96,7 +96,7 @@ def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
         rho0nT = np.mean(rho0nTs[~np.isnan(rho0nTs)])
         nTs.append(rho0nT/rho_xx0)
         plt.plot(Hs[cutoff:]/rho0nT, MR[cutoff:], '-', color = colors[int(T)], linewidth = 3)
-    axs.set_xlabel(r'$H/\rho_{0}n_T$ [$T\cdot\Omega^{-1}\cdot m^{-1}$]', fontsize = 20)
+    axs.set_xlabel(r'$B/\rho_{0}n_T$ [$T\cdot\Omega^{-1}\cdot m^{-1}$]', fontsize = 20)
     axs.set_ylabel(r'$MR$ [%]', fontsize = 20)
     axs.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
     axs.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
@@ -113,7 +113,7 @@ def plot_MREK(Ts, Hs, MRs, rho_xx0s, cutoff, resu_dir):
     plt.close()
 
     f, axs = plt.subplots(1, 1, figsize = (8,7))
-    plt.plot(Ts, nTs, '-', linewidth = 3)
+    plt.plot(Ts, nTs, '-o', linewidth = 3,  markersize=10)
     axs.set_xlabel(r'$T$ [K]', fontsize = 20)
     axs.set_ylabel(r'$n_T$ []', fontsize = 20)
     axs.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)

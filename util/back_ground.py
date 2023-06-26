@@ -65,22 +65,24 @@ def subbg_po(Ts, Hs, MRs, po_power, T_max, resu_dir):
 
         f, ax = plt.subplots(2, 1, figsize = (8,7))
 
-        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3)
-        ax[0].plot(Hs, bg, ':', color = 'k', linewidth = 3)
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
+        ax[0].plot(Hs, bg, ':', color = 'k', linewidth = 3, label = 'background')
         ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-        ax[0].set_xlabel(r'$H$ [T]', fontsize = 20)
+        ax[0].set_xlabel(r'$B$ [T]', fontsize = 20)
         ax[0].yaxis.offsetText.set_visible(False)
         ax[0].figure.canvas.draw()
         ax[0].set_ylabel(r'$MR$'+ f'[{ax[0].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
+        ax[0].legend(fontsize = 20)
 
-        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)], linewidth = 3)
+        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-        ax[1].set_xlabel(r'$H$ [T]', fontsize = 20)
+        ax[1].set_xlabel(r'$B$ [T]', fontsize = 20)
         ax[1].yaxis.offsetText.set_visible(False)
         ax[1].figure.canvas.draw()
         ax[1].set_ylabel(r'$\Delta MR$'+ f'[{ax[1].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
+        ax[1].legend(fontsize = 20)
 
         f.subplots_adjust(hspace = 0)
         f.savefig(os.path.join(resu_dir, f'subbg_po_{T}K.png'))
@@ -105,8 +107,8 @@ def subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir):
 
         f, ax = plt.subplots(2, 1, figsize = (8,7))
 
-        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3)
-        ax[0].plot(Hs, bg, ':', color = 'k', linewidth = 3)
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
+        ax[0].plot(Hs, bg, ':', color = 'k', linewidth = 3, label = 'background')
         ax[0].vlines(bspss[:(pieces - 1)], 0, np.max(MR), linestyle = '--', color = 'k')
         ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
@@ -114,15 +116,17 @@ def subbg_pp(Ts, Hs, MRs, pp_power, pieces, T_max, resu_dir):
         ax[0].yaxis.offsetText.set_visible(False)
         ax[0].figure.canvas.draw()
         ax[0].set_ylabel(r'$MR$'+ f'[{ax[0].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
+        ax[0].legend(fontsize = 20)
         
 
-        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)], linewidth = 3)
+        ax[1].plot(Hs, MR - bg, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
         ax[1].set_xlabel(r'$H$ [T]', fontsize = 20)
         ax[1].yaxis.offsetText.set_visible(False)
         ax[1].figure.canvas.draw()
         ax[1].set_ylabel(r'$\Delta MR$'+ f'[{ax[1].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
+        ax[1].legend(fontsize = 20)
 
         f.subplots_adjust(hspace = 0)
         f.savefig(os.path.join(resu_dir, f'subbg_pp_{T}K.png'))
@@ -149,22 +153,24 @@ def subbg_de(Ts, Hs, MRs, avg_window, T_max, resu_dir):
 
         f, ax = plt.subplots(2, 1, figsize = (8,7))
 
-        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3)
+        ax[0].plot(Hs, MR, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
         ax[0].set_xlabel(r'$H$ [T]', fontsize = 20)
         ax[0].yaxis.offsetText.set_visible(False)
         ax[0].figure.canvas.draw()
         ax[0].set_ylabel(r'$MR$'+ f'[{ax[0].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
+        ax[0].legend(fontsize = 20)
 
-        ax[1].plot(Hs_out, MR_out, '-', color = colors[int(T)], linewidth = 3)
+        ax[1].plot(Hs_out, MR_out, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
         ax[1].set_xlabel(r'$H$ [T]', fontsize = 20)
         ax[1].yaxis.offsetText.set_visible(False)
         ax[1].figure.canvas.draw()
         ax[1].set_ylabel(r'$\partial^2 MR/\partial H^2$'+ f'[{ax[1].yaxis.get_major_formatter().get_offset()} %]', fontsize = 20)
-
+        ax[1].legend(fontsize = 20)
+        
         f.subplots_adjust(hspace = 0)
         f.savefig(os.path.join(resu_dir, f'subbg_de_{T}K.png'))
         plt.close()

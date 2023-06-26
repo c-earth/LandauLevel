@@ -17,8 +17,9 @@ def FFT(Ts_sub, Hs_sub, MRs_sub, T_max, q_min, q_max, subbg, resu_dir):
     qs = []
     MRs_iH_fft = []
 
-    f, ax = plt.subplots(2, 1, figsize = (8,7))
+    
     for T, MR in zip(Ts_sub, MRs_sub):
+        f, ax = plt.subplots(2, 1, figsize = (8,7))
         MR_iH = PchipInterpolator(*resolve_monotone(iHs_sub, MR), extrapolate = False)
         MR_iH = MR_iH(iH)
 
@@ -30,27 +31,28 @@ def FFT(Ts_sub, Hs_sub, MRs_sub, T_max, q_min, q_max, subbg, resu_dir):
         MRs_iH_fft.append(MR_iH_fft)
 
         ax[0].plot(iH, MR_iH, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
-        ax[1].plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)], linewidth = 3)
+        ax[1].plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         
-    ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
-    ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-    ax[0].set_xlabel(r'$H^{-1}$ [T$^{-1}$]', fontsize = 20)
-    ax[0].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
-    ax[0].yaxis.get_offset_text().set_size(20)
-    ax[0].set_xscale('log')
-    ax[0].legend(fontsize = 20, loc = 'upper right')
+        ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+        ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
+        ax[0].set_xlabel(r'$B^{-1}$ [T$^{-1}$]', fontsize = 20)
+        ax[0].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
+        ax[0].yaxis.get_offset_text().set_size(20)
+        ax[0].set_xscale('log')
+        ax[0].legend(fontsize = 20, loc = 'upper right')
 
-    ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
-    ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
-    ax[1].set_xlabel(r'$q$ [T]', fontsize = 20)
-    ax[1].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
-    ax[1].yaxis.get_offset_text().set_size(20)
-    ax[1].set_ylim((0, 1.2 * np.max(np.abs(np.stack(MRs_iH_fft))[:, q > 1])))
-    ax[1].set_xlim((q_min, q_max))
+        ax[1].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+        ax[1].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
+        ax[1].set_xlabel(r'$q$ [T]', fontsize = 20)
+        ax[1].set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
+        ax[1].yaxis.get_offset_text().set_size(20)
+        ax[1].set_ylim((0, 1.2 * np.max(np.abs(np.stack(MRs_iH_fft))[:, q > 1])))
+        ax[1].set_xlim((q_min, q_max))
+        ax[1].legend(fontsize = 20, loc = 'upper right')
 
-    f.tight_layout()
-    f.savefig(os.path.join(resu_dir, f'FFT_{subbg}.png'))
-    plt.close()
+        f.tight_layout()
+        f.savefig(os.path.join(resu_dir, f'FFT_{subbg}_{T}K.png'))
+        plt.close()
     return iH, np.stack(MRs_iH), np.stack(qs), np.stack(MRs_iH_fft)
 
 
@@ -98,9 +100,15 @@ def FFT_peaks(q, MR_iH_fft, r_min, r_max, T_max, resu_dir, T, subbg):
 
     colors = mpl.colormaps['gnuplot'](np.linspace(0.3, 0.9, int(T_max) + 1))
     f, ax = plt.subplots(1, 1, figsize = (8,7))
-    ax.plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)])
+    ax.plot(q, np.abs(MR_iH_fft), '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
     for y_amp, y_pos, y_width in zip(y_amps, y_poss, y_widthes):
-        ax.plot(q, lorentz(q, y_amp, y_pos, y_width), ':', color = 'k')
+        ax.plot(q, lorentz(q, y_amp, y_pos, y_width), ':', color = 'k', linewidth = 3)
+    ax.tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
+    ax.ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)
+    ax.set_xlabel(r'$q$ [T]', fontsize = 20)
+    ax.set_ylabel(r'$\Delta MR$ [%]', fontsize = 20)
+    ax.yaxis.get_offset_text().set_size(20)
+    ax.legend(fontsize = 20, loc = 'upper right')
     
     f.savefig(os.path.join(resu_dir, f'peaks_{subbg}_{T}K.png'))
     plt.close()
