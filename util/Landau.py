@@ -53,6 +53,7 @@ def FFT(Ts_sub, Hs_sub, MRs_sub, T_max, q_min, q_max, subbg, resu_dir):
         f.tight_layout()
         f.savefig(os.path.join(resu_dir, f'FFT_{subbg}_{T}K.png'))
         plt.close()
+        
     return iH, np.stack(MRs_iH), np.stack(qs), np.stack(MRs_iH_fft)
 
 
