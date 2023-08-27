@@ -65,7 +65,7 @@ def subbg_po(Ts, Bs, MRs, po_power, T_max, resu_dir):
 
         f, ax = plt.subplots(2, 1, figsize = (8,7))
 
-        ax[0].plot(Bs, MR, '-', color = colors[int(T)], linewidth = 3, label = f'{T} K')
+        ax[0].plot(Bs, MR, '.', color = colors[int(T)], linewidth = 3, label = f'{T} K')
         ax[0].plot(Bs, bg, ':', color = 'k', linewidth = 3, label = 'background')
         ax[0].tick_params(which = 'both', direction = 'in', top = False, right = False, length = 5, width = 1.5, labelsize = 20)
         ax[0].ticklabel_format(axis = 'y', style = 'sci', scilimits = (0, 0), useMathText=True)

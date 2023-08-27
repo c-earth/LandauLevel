@@ -9,17 +9,17 @@ from util.data import resolve_monotone
 
 # data inputs
 #######################################################
-# MR_S2
-# sample's measurement data folder
-data_dir = 'D:/python_project/LandauLevel/data/MR_S2/'
+# # MR_S2
+# # sample's measurement data folder
+# data_dir = 'D:/python_project/LandauLevel/data/MR_S2/'
 
-# thickness, width, and length of the sample
-T = 0.85
-W = 1.76
-L = 1.33
+# # thickness, width, and length of the sample
+# T = 0.85
+# W = 1.76
+# L = 1.33
 
-# PPMS measurement channel number
-ch = 2
+# # PPMS measurement channel number
+# ch = 2
 ########################################################
 # # MR_S4
 # # sample's measurement data folder
@@ -32,6 +32,18 @@ ch = 2
 
 # # PPMS measurement channel number
 # ch = 1
+########################################################
+# MR_S4
+# sample's measurement data folder
+data_dir = 'D:/python_project/LandauLevel/data/Cd3As2/'
+
+# thickness, width, and length of the sample
+T = 1000
+W = 1000
+L = 1000
+
+# PPMS measurement channel number
+ch = 1
 ########################################################
 
 
